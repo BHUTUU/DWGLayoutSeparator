@@ -101,6 +101,14 @@ def getDestinationFolder():
     if folderPath:
         folderPathtk.set(folderPath)
         folderLabel.configure(text=folderPath)
+def getDesktopPath():
+    shell = win32com.client.Dispatch("WScript.Shell")
+    desktopPathRaw = shell.SpecialFolders("Desktop")
+    desktopPath=desktopPathRaw.replace("\\","/")
+    return desktopPath
+def getSystem32Path():
+    system32path = os.path.join(os.getenv("systemroot"), "System32").replace("\\", "/")
+    return system32path
 def runner():
     global filePathtk, folderPathtk
     s_file = filePathtk.get()
@@ -111,9 +119,10 @@ def runner():
             if s_file.split("\\")[:-1] == s_folder.split("\\"):
                 messagebox.showerror("Error", "Please select different folder for the output")
                 return False
-            if s_folder.find("Desktop") == len(s_folder) - 7 or s_folder.find(r"C:\Windows\System32")==0:
+            if s_folder == str(getDesktopPath()) or s_folder.lower() == str(getSystem32Path()).lower():
                 messagebox.showerror("Error", "Output folder may contains system files. Please select different path for the output.")
                 messagebox.showinfo("Precaution", "Desktop and system32 is not to be used as output folder!")
+                return False
             try:
                 resp = s_ins.doSeparate(s_file, s_folder)
                 messagebox.showinfo("Success", f"Response: {resp}")
